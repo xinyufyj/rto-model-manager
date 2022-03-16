@@ -4,7 +4,7 @@ import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import path from 'path'
-import './mainApi'
+import { getWorkdir, setWorkdir } from './mainApi'
 import logger from './log'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -14,7 +14,6 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-let workdir = 'xxxx'
 let win = null
 
 async function createWindow() {
@@ -116,12 +115,11 @@ if (isDevelopment) {
         console.error('Vue Devtools failed to install:', e.toString())
       }
     }
-
-    workdir = app.commandLine.getSwitchValue("workdir")
+    setWorkdir(app.commandLine.getSwitchValue("workdir"))
     createWindow()
   })
  }
 
  ipcMain.handle('getWorkDir', (event) => {
-  return Promise.resolve(workdir)
+  return Promise.resolve(getWorkdir())
 })

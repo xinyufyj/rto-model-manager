@@ -4,6 +4,16 @@ const fsPromise = require('fs').promises;
 const fs = require('fs')
 import logger from './log'
 
+let workdir = ''
+
+export function getWorkdir() {
+  return workdir
+}
+
+export function setWorkdir(s) {
+  workdir = s
+}
+
 async function getFiles(dir) {
   const dirents = await fsPromise.readdir(dir, { withFileTypes: true });
   const files = await Promise.all(dirents.map((dirent) => {
@@ -15,10 +25,14 @@ async function getFiles(dir) {
 }
 
 ipcMain.handle('showOpenDialog', (event, title) => {
-  return dialog.showOpenDialog(BrowserWindow.getAllWindows()[0], {
+  let opts = {
     title: title,
     properties: ['openDirectory']
-  })
+  }
+  if(workdir) {
+    opts.defaultPath = workdir
+  }
+  return dialog.showOpenDialog(BrowserWindow.getAllWindows()[0], opts)
 })
 
 ipcMain.handle('getModelList', (event, workdir) => {
